@@ -1,0 +1,4 @@
+<testsuite name="Mocha Tests" tests="2" failures="0" errors="0" skipped="0" timestamp="2018-02-03T13:05:16" time="0.13">
+<testcase classname="POST /todos" name="should create a new todo" time="0.064"/>
+<testcase classname="POST /todos" name="it should not create todo with invalid body data" time="0.012"/>
+</testsuite>
