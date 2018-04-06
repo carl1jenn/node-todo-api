@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test-i" :"istanbul cover --report cobertura _mocha test",
-    "test": "mocha server/**/*.test.js -R xunit-file --reporter-options XUNIT_FILE=report.xml",
+    "test": "mocha server/**/*.test.js",
     "test-watch": "nodemon --exec npm test"
   },
   "author": "",
