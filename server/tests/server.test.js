@@ -185,52 +185,100 @@ describe('Get /users/me', () => {
     })
     .end(done);
   });
+});
 
-  describe('POST /users', () => {
-    it('should create a user', (done) => {
-      var email = 'example@example.com';
-      var password = '123mnd!';
+describe('POST /users', () => {
+  it('should create a user', (done) => {
+    var email = 'example@example.com';
+    var password = '123mnd!';
 
-      request(app)
-        .post('/user')
-        .send({email, password})
-        .expect(200)
-        .expect((res) => {
-          expect(res.header['x-auth']).toBeTruthy();
-          expect(res.body._id).toBeTruthy();
-          expect(res.body.email).toBe(email);
-        })
-        .end((err) => {
-          if (err) {
-            return done(err);
-          }
-          User.findOne({email}).then((user) => {
-            expect(user).toBeTruthy;
-            expect(user.password).not.toBe(password);
+    request(app)
+      .post('/user')
+      .send({email, password})
+      .expect(200)
+      .expect((res) => {
+        expect(res.header['x-auth']).toBeTruthy();
+        expect(res.body._id).toBeTruthy();
+        expect(res.body.email).toBe(email);
+      })
+      .end((err) => {
+        if (err) {
+          return done(err);
+        }
+        User.findOne({email}).then((user) => {
+          expect(user).toBeTruthy;
+          expect(user.password).not.toBe(password);
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+  it('should return validation erros if request invalid', (done) => {
+    var email = 'example';
+    var password = '';
+
+    request(app)
+      .post('/user')
+      .send({email, password})
+      .expect(400)
+      .end(done);
+  });
+  it('should not create a user if email in use', (done) => {
+    var email = 'carl1jenn@carl.com';
+    var password = '123mnd!';
+
+    request(app)
+      .post('/user')
+      .send({email, password})
+      .expect(400)
+      .end(done);
+  });
+});
+
+
+describe ('POST /users/login', () => {
+  it('should login user and return auth token', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({
+        email: users[1].email,
+        password: users[1].password
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toBeTruthy();
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        User.findById(users[1]._id).then((user) => {
+            expect(user.tokens[0]).toEqual(expect.objectContaining({
+              access: 'auth',
+              token: res.headers['x-auth']
+            }));
             done();
-          })
-        });
-    });
-    it('should return validation erros if request invalid', (done) => {
-      var email = 'example';
-      var password = '';
-
-      request(app)
-        .post('/user')
-        .send({email, password})
-        .expect(400)
-        .end(done);
-    });
-    it('should not create a user if email in use', (done) => {
-      var email = 'carl1jenn@carl.com';
-      var password = '123mnd!';
-
-      request(app)
-        .post('/user')
-        .send({email, password})
-        .expect(400)
-        .end(done);
-    });
-
+        }).catch((e) => done(e));
+      });
+  });
+  it('should reject invalid login', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({
+        email: users[1].email,
+        password: users[1].password + '1'
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.headers['x-auth']).not.toBeTruthy();
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        User.findById(users[1]._id).then((user) => {
+            expect(user.tokens.length).toBe(0);
+            done();
+        }).catch((e) => done(e));
+      });
   });
 });

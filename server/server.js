@@ -113,7 +113,6 @@ app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
 });
 
-// post /users/login {email, password}
 app.post('/users/login', (req,res) => {
   var body = _.pick(req.body, ['email'],['password'])
 
@@ -125,9 +124,6 @@ app.post('/users/login', (req,res) => {
     res.status(400).send();
   });
 });
-
-
-
 
 app.listen(port, () => {
   console.log(`started on port ${port}`);
